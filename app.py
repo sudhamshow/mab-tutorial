@@ -109,19 +109,6 @@ def main():
 
     st.write("By evaluating multi-armed bandit algorithms using these metrics, we can compare their effectiveness in maximizing rewards and minimizing regret.")
 
-
-    # Adaptive Experiments and Policy Interventions
-    st.header("Adaptive Experiments and Policy Interventions")
-    st.write("Multi-armed bandits are not limited to casino games or online advertising. They have become increasingly popular in adaptive experiments and policy interventions.")
-
-    st.write("Adaptive experiments refer to experiments where the allocation of treatments or interventions adapts based on the observed outcomes. By applying multi-armed bandit algorithms, researchers can efficiently explore different treatments and identify the most effective one.")
-
-    st.write("In policy interventions, multi-armed bandits can help optimize resource allocation. For example, in a public health campaign, policymakers can allocate resources to different interventions and adapt their strategy based on the observed impact on desired outcomes.")
-
-    st.write("These applications involve dynamically allocating resources based on observed data, leading to better decision-making and more efficient outcomes.")
-
-    st.write("Now that you have a deeper understanding of multi-armed bandits, their algorithms, and their applications, you can apply them to various scenarios and make optimal decisions under uncertainty.")
-
     # Adaptive Experiments and Policy Interventions
     st.header("Adaptive Experiments and Policy Interventions")
     st.write("Adaptive experiments refer to experiments where the allocation of treatments or interventions adapts based on the observed outcomes. The goal is to identify the best policy or treatment from a set of options.")
