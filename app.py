@@ -1,8 +1,4 @@
 import streamlit as st
-from bandit import bernoulli_thompson_sampling
-
-def main():
-import streamlit as st
 
 def main():
     st.title("Multi-Armed Bandits Tutorial")
@@ -87,7 +83,6 @@ def main():
     st.write("These applications involve dynamically allocating resources based on observed data, leading to better decision-making and more efficient outcomes.")
 
     st.write("Now that you have a deeper understanding of multi-armed bandits, their algorithms, and their applications, you can apply them to various scenarios and make optimal decisions under uncertainty.")
-
 
 if __name__ == "__main__":
     main()
