@@ -72,6 +72,44 @@ def main():
 
     st.write("Bernoulli Thompson Sampling adapts to sparse and non-stationary reward distributions, making informed decisions based on posterior beliefs.")
 
+    # Evaluation Metrics: Average Cumulative Regret and Simple Regret
+    st.header("Evaluation Metrics for Multi-Armed Bandit algorithms: Average Cumulative Regret and Simple Regret")
+
+    st.write("When evaluating multi-armed bandit algorithms, we need metrics to measure their performance. Two commonly used metrics are Average Cumulative Regret and Simple Regret.")
+
+    st.subheader("Simple Regret")
+
+    st.write("Simple Regret, also known as Instantaneous Regret, measures the difference between the expected reward of the optimal arm and the reward obtained from the chosen arm at each time step t.")
+
+    st.write("Mathematically, Simple Regret at time t can be defined as:")
+    st.latex(r"S(t) = \max_{a^\ast \in \mathcal{A}} \mu^\ast - \mu_{A(t)}")
+
+    st.write("where:")
+    st.latex(r"S(t) = \text{Simple Regret at time t}")
+    st.latex(r"a^\ast = \text{Optimal arm with the highest reward probability}")
+    st.latex(r"\mu^\ast = \text{Expected reward of the optimal arm}")
+    st.latex(r"\mu_{A(t)} = \text{Expected reward of the chosen arm at time t}")
+
+    st.write("Simple Regret provides a measure of how much reward is lost at each time step by not selecting the optimal arm.")
+
+    st.subheader("Average Cumulative Regret")
+
+    st.write("While Simple Regret captures the regret at each time step, Average Cumulative Regret sums up the regrets over a sequence of trials and provides a more comprehensive measure of the algorithm's performance.")
+
+    st.write("Mathematically, Average Cumulative Regret after T trials can be defined as:")
+    st.latex(r"R(T) = T \mu^\ast - \sum_{t=1}^{T} \mu_{A(t)}")
+
+    st.write("where:")
+    st.latex(r"R(T) = \text{Average Cumulative Regret after T trials}")
+    st.latex(r"T = \text{Number of trials}")
+    st.latex(r"\mu^\ast = \text{Expected reward of the optimal arm}")
+    st.latex(r"\mu_{A(t)} = \text{Expected reward of the chosen arm at time t}")
+
+    st.write("Average Cumulative Regret measures the total regret accumulated over T trials compared to always selecting the optimal arm. A lower Average Cumulative Regret indicates better performance.")
+
+    st.write("By evaluating multi-armed bandit algorithms using these metrics, we can compare their effectiveness in maximizing rewards and minimizing regret.")
+
+
     # Adaptive Experiments and Policy Interventions
     st.header("Adaptive Experiments and Policy Interventions")
     st.write("Multi-armed bandits are not limited to casino games or online advertising. They have become increasingly popular in adaptive experiments and policy interventions.")
@@ -83,6 +121,27 @@ def main():
     st.write("These applications involve dynamically allocating resources based on observed data, leading to better decision-making and more efficient outcomes.")
 
     st.write("Now that you have a deeper understanding of multi-armed bandits, their algorithms, and their applications, you can apply them to various scenarios and make optimal decisions under uncertainty.")
+
+    # Adaptive Experiments and Policy Interventions
+    st.header("Adaptive Experiments and Policy Interventions")
+    st.write("Adaptive experiments refer to experiments where the allocation of treatments or interventions adapts based on the observed outcomes. The goal is to identify the best policy or treatment from a set of options.")
+
+    st.write("In adaptive experiments, policies are often represented as probability distributions over the arms. Each policy specifies the probability of selecting each arm at any given time.")
+
+    st.write("Mathematically, let's define:")
+    st.latex(r"\pi = (\pi_1, \pi_2, ..., \pi_k) = \text{{Probability distribution over the arms}}")
+    st.latex(r"T(a) = \text{{Number of times arm }} a \text{{ has been selected}}")
+    st.latex(r"R(a) = \text{{Sum of rewards obtained from arm }} a")
+    st.latex(r"\hat{r}(a) = \frac{R(a)}{T(a)} = \text{{Estimated reward of arm }} a")
+
+    st.write("The objective is to maximize the cumulative reward or minimize the cumulative regret over a series of trials.")
+
+    st.write("One commonly used approach is to select the policy with the highest upper confidence bound (UCB) estimate. The UCB estimate for each policy is calculated as:")
+    st.latex(r"UCB(a) = \hat{r}(a) + \sqrt{\frac{2 \log(n)}{T(a)}}")
+
+    st.write("By choosing the policy with the highest UCB, we balance exploration (choosing arms with high uncertainty) and exploitation (choosing arms with high estimated rewards). This adaptive approach allows us to learn and adapt our policy based on the observed outcomes.")
+
+    st.write("Adaptive experiments have been successfully applied in various policy interventions. For example, in a public health campaign, policymakers can allocate resources to different interventions and adapt their strategy based on the observed impact on desired outcomes. By dynamically allocating resources based on observed data, policymakers can make informed decisions and optimize the effectiveness of their interventions.")
 
 if __name__ == "__main__":
     main()
