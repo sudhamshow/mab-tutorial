@@ -5,15 +5,32 @@ def main():
 
     # Introduction to Multi-Armed Bandits
     st.header("Introduction")
-    st.write("Welcome to the Multi-Armed Bandits Tutorial! Get ready to explore the fascinating world of decision-making under uncertainty.")
 
-    st.write("Imagine you walk into a casino and see a row of slot machines, each with a different lever or button to pull. Your goal is to maximize your winnings over a series of trials. However, you don't know the exact reward probabilities of each machine. This is the essence of the multi-armed bandits problem.")
+    st.write("Imagine you walk into a casino and see a row of slot machines, each with a different lever or button to pull. You want to make as much money as possible, but you don't know which machines are the most likely to pay out. More formally, suppose there's a true distribution of rewards for each of the slot machines (which you are unaware of), and you need to come up with a strategy to maximize your potential winnings. This is the essence of the multi-armed bandits problem.", fontsize=40)
 
-    st.write("In real-world scenarios, multi-armed bandits have numerous applications. For example, in online advertising, you want to determine which ad to display to users to maximize click-through rates. Each ad can be considered an 'arm', and the goal is to learn which ad has the highest click-through rate by exploring and exploiting different options.")
+    st.write("In real-world scenarios, multi-armed bandits have numerous applications where the problem is set up as previously defined. For example, in online advertising, you want to determine which ad to display to users to maximize click-through rates. Each ad can be considered an 'arm', and the goal is to learn which ad has the highest click-through rate by exploring and exploiting different options.")
 
     st.write("Another scenario is in clinical trials, where researchers need to identify the most effective treatment from a set of options. By applying multi-armed bandits, they can allocate patients to different treatments and adapt their strategy based on the observed outcomes. This adaptive approach allows for efficient exploration of different treatments and maximizes the chances of identifying the best one.")
 
-    st.write("Now, let's delve into the different algorithms used in multi-armed bandits.")
+    st.subheader("Exploration vs. Exploitation")
+
+    st.markdown("""
+    The multi-armed bandit problem is a classic dilemma in decision-making under uncertainty. It refers to a scenario where an agent (or gambler) is faced with a set of slot machines (or bandits), each with a different unknown probability distribution of rewards. The agent's goal is to maximize its cumulative reward over a series of sequential actions, while simultaneously balancing the exploration of potentially better options and the exploitation of known good options.
+
+    **Exploration** involves trying out different arms to gather information about their reward probabilities. It allows the agent to discover potentially better arms.
+
+    **Exploitation** involves choosing the arm that is estimated to have the highest reward probability based on the information collected so far. It maximizes the immediate reward.
+
+    The multi-armed bandit problem aims to find the optimal tradeoff between exploration and exploitation to maximize the cumulative reward over time.
+
+    There are two main categories of algorithms used to solve the multi-armed bandit problem:
+
+    - **Frequentist Approaches**: These algorithms use frequentist statistics to estimate the arm probabilities and make decisions based on past observations. Two popular frequentist algorithms are the *epsilon-greedy* and *Upper Confidence Bound (UCB)* methods.
+
+    - **Bayesian Approaches**: These algorithms use Bayesian statistics to model the uncertainty of arm probabilities and update their beliefs based on new observations. One commonly used Bayesian algorithm is *Bernoulli Thompson Sampling*.
+
+    In this tutorial, we will delve into these algorithms and explore how they tackle the exploration-exploitation tradeoff to solve the multi-armed bandit problem.
+    """)
 
     # Epsilon-Greedy Algorithm
     st.header("Epsilon-Greedy Algorithm")
@@ -131,4 +148,4 @@ def main():
     st.write("Adaptive experiments have been successfully applied in various policy interventions. For example, in a public health campaign, policymakers can allocate resources to different interventions and adapt their strategy based on the observed impact on desired outcomes. By dynamically allocating resources based on observed data, policymakers can make informed decisions and optimize the effectiveness of their interventions.")
 
 if __name__ == "__main__":
-    main()
+	main()
