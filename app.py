@@ -6,7 +6,7 @@ def main():
     # Introduction to Multi-Armed Bandits
     st.header("Introduction")
 
-    st.write("Imagine you walk into a casino and see a row of slot machines, each with a different lever or button to pull. You want to make as much money as possible, but you don't know which machines are the most likely to pay out. More formally, suppose there's a true distribution of rewards for each of the slot machines (which you are unaware of), and you need to come up with a strategy to maximize your potential winnings. This is the essence of the multi-armed bandits problem.", fontsize=40)
+    st.write("Imagine you walk into a casino and see a row of slot machines, each with a different lever or button to pull. You want to make as much money as possible, but you don't know which machines are the most likely to pay out. More formally, suppose there's a true distribution of rewards for each of the slot machines (which you are unaware of), and you need to come up with a strategy to maximize your potential winnings. This is the essence of the multi-armed bandits problem.")
 
     st.write("In real-world scenarios, multi-armed bandits have numerous applications where the problem is set up as previously defined. For example, in online advertising, you want to determine which ad to display to users to maximize click-through rates. Each ad can be considered an 'arm', and the goal is to learn which ad has the highest click-through rate by exploring and exploiting different options.")
 
@@ -148,18 +148,4 @@ def main():
     st.write("Adaptive experiments have been successfully applied in various policy interventions. For example, in a public health campaign, policymakers can allocate resources to different interventions and adapt their strategy based on the observed impact on desired outcomes. By dynamically allocating resources based on observed data, policymakers can make informed decisions and optimize the effectiveness of their interventions.")
 
 if __name__ == "__main__":
-    # Adjust Streamlit layout and styles
-    st.set_page_config(layout="centered")
-    st.markdown(
-        """
-        <style>
-        body {
-            font-size: 30px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-    main()
+	main()
