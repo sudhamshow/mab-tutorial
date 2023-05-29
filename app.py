@@ -148,4 +148,18 @@ def main():
     st.write("Adaptive experiments have been successfully applied in various policy interventions. For example, in a public health campaign, policymakers can allocate resources to different interventions and adapt their strategy based on the observed impact on desired outcomes. By dynamically allocating resources based on observed data, policymakers can make informed decisions and optimize the effectiveness of their interventions.")
 
 if __name__ == "__main__":
-	main()
+    # Adjust Streamlit layout and styles
+    st.set_page_config(layout="centered")
+    st.markdown(
+        """
+        <style>
+        body {
+            font-size: 30px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+    main()
