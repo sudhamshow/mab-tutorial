@@ -2,6 +2,94 @@ import streamlit as st
 import numpy as np
 from bandit import EpsilonGreedy
 from bandit import UCB
+from bandit import BernoulliThompson
+from scipy.stats import beta
+import matplotlib.pyplot as plt
+
+def run_simulation_bts(bandit, true_rewards, num_iterations, arm_chart, prob_chart, selection_prob_chart, regret_chart, beta_chart):
+    rewards = np.zeros(num_iterations)
+    cumulative_regrets = np.zeros(num_iterations)
+    average_regrets = np.zeros(num_iterations)
+    selection_probabilities = np.zeros((num_iterations, bandit.num_arms))
+    optimal_arm = np.argmax(true_rewards)
+    for i in range(num_iterations):
+        arm = bandit.select_arm()
+        selection_probabilities[i, :] = bandit.arm_counts / (np.sum(bandit.arm_counts) + 1e-10)
+        reward = np.random.binomial(1, true_rewards[arm])  # binary reward
+        bandit.update(arm, reward)
+        rewards[i] = reward
+        cumulative_regrets[i] = (i+1) * true_rewards[optimal_arm] - np.sum(rewards)
+        average_regrets[i] = cumulative_regrets[i] / (i+1)
+        if (i+1) % 100 == 0:  # update every 100 iterations
+            arm_chart.bar_chart(bandit.arm_counts / (i + 1))
+            regret_chart.line_chart({'Cumulative Regret': cumulative_regrets[:i + 1],
+                                     'Average Regret': average_regrets[:i + 1]})
+            prob_chart.bar_chart(bandit.arm_counts / np.sum(bandit.arm_counts))  # Show proportions of arm selections
+            selection_prob_chart.line_chart(selection_probabilities[:i + 1])
+            beta_chart.pyplot(draw_beta_plot(bandit.alpha, bandit.beta))  # Update beta posterior chart
+    return rewards, cumulative_regrets, average_regrets
+
+def draw_beta_plot(alpha, beta_param):
+    x = np.linspace(0, 1, 1002)[1:-1]
+    fig, ax = plt.subplots()
+    for i in range(len(alpha)):
+        y = beta.pdf(x, alpha[i], beta_param[i])
+        ax.plot(x, y, label=f'Arm {i}')
+    ax.set_xlabel('Reward')
+    ax.set_ylabel('Probability Density')
+    ax.set_title('Beta Posterior Distributions Over Arms')
+    ax.legend()
+    return fig
+
+
+
+def draw_ucb_plot(i, arm_rewards, ucbs):
+    labels = [f'Arm {j+1}' for j in range(len(arm_rewards))]
+    fig, ax = plt.subplots()
+    ax.boxplot([np.random.normal(loc=arm_rewards[j], scale=0.1, size=1000) for j in range(len(arm_rewards))],
+               whis=[0, 100],  # Ensure that the whisker goes up to the max value
+               showfliers=False,  # Don't show outliers
+               medianprops={'color': 'black'},  # Make the median (reward estimate) visible
+               patch_artist=True)  # To allow coloring of boxes
+
+    # Plot the UCBs
+    for j, ucb in enumerate(ucbs):
+        plt.plot(j + 1, ucb, 'ro')
+
+    plt.ylabel('Reward')
+    plt.title(f'Iteration {i+1}')
+    plt.xticks(np.arange(1, len(labels)+1), labels)
+
+    # Close figure to save memory
+    plt.close(fig)
+
+    # Return the figure
+    return fig
+
+def run_simulation_ucb(bandit, true_rewards, num_iterations, arm_chart, prob_chart, selection_prob_chart, regret_chart, ucb_chart):
+    rewards = np.zeros(num_iterations)
+    cumulative_regrets = np.zeros(num_iterations)
+    average_regrets = np.zeros(num_iterations)
+    selection_probabilities = np.zeros((num_iterations, bandit.num_arms))
+    ucbs = np.zeros((num_iterations, bandit.num_arms))  # Store UCB values
+    optimal_arm = np.argmax(true_rewards)
+    for i in range(num_iterations):
+        arm = bandit.select_arm()
+        selection_probabilities[i, :] = bandit.arm_counts / (np.sum(bandit.arm_counts) + 1e-10)
+        ucbs[i, :] = bandit.ucbs  # Store current UCB values
+        reward = np.random.binomial(1, true_rewards[arm])  # binary reward
+        bandit.update(arm, reward)
+        rewards[i] = reward
+        cumulative_regrets[i] = (i+1) * true_rewards[optimal_arm] - np.sum(rewards)
+        average_regrets[i] = cumulative_regrets[i] / (i+1)
+        if (i+1) % 100 == 0:  # update every 100 iterations
+            arm_chart.bar_chart(bandit.arm_counts / (i + 1))
+            regret_chart.line_chart({'Cumulative Regret': cumulative_regrets[:i + 1],
+                                     'Average Regret': average_regrets[:i + 1]})
+            prob_chart.bar_chart(bandit.arm_rewards)
+            selection_prob_chart.line_chart(selection_probabilities[:i + 1])
+            ucb_chart.pyplot(draw_ucb_plot(i, bandit.arm_rewards, bandit.ucbs))  # Update UCB chart
+    return rewards, cumulative_regrets, average_regrets
 
 def run_simulation(bandit, true_rewards, num_iterations, arm_chart, prob_chart, selection_prob_chart, regret_chart):
     rewards = np.zeros(num_iterations)
@@ -42,7 +130,7 @@ def main():
     st.markdown("""Author: *Sudhamshu Hosamane*""")
 
     st.sidebar.title("Index")
-    options = st.sidebar.radio("Navigate to", ['Introduction', 'Epsilon-Greedy Algorithm', 'UCB Algorithm'])
+    options = st.sidebar.radio("Navigate to", ['Introduction', 'Epsilon-Greedy Algorithm', 'UCB Algorithm', 'Bernoulli Thompson Sampling', 'Contextual Bandits'])
     #
     # # Introduction
     if options == 'Introduction':
@@ -155,6 +243,7 @@ def main():
 
 
         st.write("The Epsilon-Greedy algorithm is simple to implement and effective in scenarios with relatively stable reward distributions. Here's a basic implementation:")
+        st.markdown(r"""Instead of having a fixed epsilon, to ensure that the uncertainty decreases with time. We often set epsilon $\propto \frac{1}{\sqrt{n}}$, where `n` is the n'th iteration""")
 
         st.code("""
             class EpsilonGreedy:
@@ -184,7 +273,6 @@ def main():
         new_value = ((count - 1) / float(count)) * value + (1 / float(count)) * reward
         self.arm_rewards[chosen_arm] = new_value
             """, language='python')
-
         st.write("This code defines a class `EpsilonGreedy` that maintains the count and total reward for each arm. The `select_arm` method chooses an arm to play: with probability `epsilon`, it selects a random arm; otherwise, it selects the arm with the highest average reward. The `update` method updates the count and total reward for the chosen arm based on the received reward.")
         st.markdown("##### Vary the below parameters and observe they affect the probability of the selection of each arm and the Cumulative Regret. The rewards follow a Bernoulli distribution (binary reward) with true parameters adjustable below")
 
@@ -192,7 +280,7 @@ def main():
                 ##### Some key principles that are verifiable -
                 * After a large number of iterations, the Epsilon-Greedy algorithm always converges to the most optimum arm, no matter how close the true means of the different arms are
                 * When the true means for different arms are close to each other, the cumulative regret might see some negative values. But eventually after a large number of iterations, the cumulative regret always stays positive
-                * There is a stark contrast in the growth rate of cumulative regret between *fixed* epsilon and *adaptive* epsilon. This is because the theoretical bound for the former is O(n) while the theoretical bound for the growth of the latter is O{sqrt(n)log(n)). The latter is a much slower growth than the former
+                * There is a stark contrast in the growth rate of cumulative regret between *fixed* epsilon and *adaptive* epsilon. This is because the theoretical bound for the former is $\mathcal{O}$(n) while the theoretical bound for the growth of the latter is $\mathcal{O}$(sqrt(n)log(n)). The latter is a much slower growth than the former
                 * The estimated rewards for each arm reach very close to the true means of the reward distributions
             """)
         num_arms = st.selectbox("Choose the number of arms", list(range(2, 6)))
@@ -226,6 +314,10 @@ def main():
         st.write(
             "The algorithm maintains upper confidence bounds for the expected rewards of each arm. It selects the arm with the highest upper confidence bound, which takes into account both the estimated reward and the uncertainty.")
 
+        st.markdown(r"""
+            From Hoeffding's bound we have :  $\mathbb{P}\bigg( R(a)\ \leq \ \overline{R}(a) + \sqrt{\frac{\ln(\frac{1}{\delta})}{2N(a)}}\bigg) \geq 1 - \delta$ for a small value delta.
+        """)
+        st.markdown(r""" For the UCB, we set $\delta = \frac{1}{n^4}$, where `n` is the number of iterations""")
         st.write("Mathematically, let's define:")
         st.latex(r"\overline{R}(a) = \frac{1}{N(a)} \sum_{t=1}^{N(a)} R_{t}(a)")
         st.latex(r"UCB(a) = \overline{R}(a) + \sqrt{\frac{2 \log(N)}{N(a)}}")
@@ -238,6 +330,39 @@ def main():
         st.write("    - Update the selection count for the chosen arm")
         st.write(
             "    - Update the estimated reward for the chosen arm based on the observed reward")
+        st.write("Sample code template for the UCB class is given below")
+        st.code("""
+                    class UCB:
+    def __init__(self, num_arms):
+        self.num_arms = num_arms
+        self.arm_rewards = np.zeros(num_arms)
+        self.arm_counts = np.zeros(num_arms)
+        self.ucbs = np.zeros(num_arms)  # UCB values for each arm
+        self.total_count = 0
+
+    def select_arm(self):
+        if self.total_count < self.num_arms:
+            return self.total_count
+        else:
+            ucb_values = self.arm_rewards + np.sqrt((2 * np.log(self.total_count)) / (self.arm_counts + 1e-10))
+            self.ucbs = ucb_values
+            return np.argmax(ucb_values)
+
+    def update(self, chosen_arm, reward):
+        self.total_count += 1
+        self.arm_counts[chosen_arm] += 1
+        count = self.arm_counts[chosen_arm]
+        value = self.arm_rewards[chosen_arm]
+        new_value = ((count - 1) / float(count)) * value + (1 / float(count)) * reward
+        self.arm_rewards[chosen_arm] = new_value
+                    """, language='python')
+
+        st.markdown(r"""
+                        ##### Some key principles that are verifiable -
+                        * After a large number of iterations, the UCB algorithm always converges to the most optimum arm, no matter how close the true means of the different arms are
+                        * With every iteration the UCB inches closer towards the empirical average reward value (the bound keeps shrinking). Theoretically, after a large number of iterations, the UCB converges to the true reward value.
+                        * The cumulative regret grows as $\mathcal{O}(log(n))$
+                    """)
 
         st.write(
             "The UCB algorithm adapts to the observed rewards and is particularly useful when dealing with uncertain or non-stationary reward distributions.")
@@ -253,10 +378,87 @@ def main():
         prob_chart = st.empty()
         st.subheader('Cumulative and Average Regret Over Time')
         selection_prob_chart = st.empty()
+        st.subheader('UCB Over Time')
+        ucb_chart = st.empty()
 
         bandit = UCB(num_arms)
-        rewards, cumulative_regrets, average_regrets = run_simulation(bandit, true_rewards, num_iterations, arm_chart,
-                                                                      regret_chart, prob_chart, selection_prob_chart)
+        rewards, cumulative_regrets, average_regrets = run_simulation_ucb(bandit, true_rewards, num_iterations, arm_chart,
+                                                                      regret_chart, prob_chart, selection_prob_chart, ucb_chart)
+
+    elif options == 'Bernoulli Thompson Sampling':
+        # Bernoulli Thompson Sampling Algorithm
+        st.header("Bernoulli Thompson Sampling Algorithm")
+        st.write(
+            "The Bernoulli Thompson Sampling algorithm, also known as Bayesian Bandit, leverages Bayesian inference to estimate arm probabilities.")
+
+        st.write(
+            "The algorithm starts with prior distributions over the arm probabilities and updates them based on the observed rewards. In each iteration, it samples from the posterior distributions and selects the arm with the highest sample.")
+
+        st.write("We know that the Beta distribution is a conjugate prior for the Bernoulli likelihood. Thus, we have:")
+        st.latex(
+            r"\text{{Beta}}(\alpha, \beta) = \text{{Beta distribution with parameters }} \alpha \text{{ and }} \beta")
+        st.latex(
+            r"\text{{Beta}}(\alpha + R(a), \beta + N(a) - R(a)) = \text{{Posterior distribution of arm }} a")
+        st.write("where, N(a) is the total number of trials for arm a and R(a) is the total number of successes for the same arm.")
+
+        st.write("The algorithm works as follows:")
+        st.write("- Initialize the prior distributions for each arm")
+        st.write("For each selection:")
+        st.write("        * Sample from the posterior distribution of each arm")
+        st.write("    - Select the arm with the highest sample (exploitation)")
+        st.write("    - Update the observed reward and selection count for the chosen arm")
+
+        st.write(
+            "Bernoulli Thompson Sampling adapts to sparse and non-stationary reward distributions, making informed decisions based on posterior beliefs.")
+        st.code("""
+                            class BernoulliThompson:
+    def __init__(self, num_arms):
+        self.num_arms = num_arms
+        self.alpha = np.ones(num_arms) # choosing a flat prior
+        self.beta = np.ones(num_arms)   # akin to sampling uniformly randomly
+        self.arm_counts = np.zeros(num_arms)  # Number of times each arm is pulled
+        self.total_count = 0  # Total number of pulls
+
+    def select_arm(self):
+        samples = [np.random.beta(self.alpha[i], self.beta[i]) for i in range(self.num_arms)]
+        return np.argmax(samples)
+
+    def update(self, chosen_arm, reward):
+        self.alpha[chosen_arm] += reward
+        self.beta[chosen_arm] += 1 - reward
+        self.arm_counts[chosen_arm] += 1
+        self.total_count += 1
+                            """, language='python')
+        st.markdown(r"""
+                                ##### Some key principles that are verifiable -
+                                * After a large number of iterations, the Bernoulli Thompson algorithm always converges to the most optimum arm, no matter how close the true means of the different arms are
+                                * The cumulative regret grows as $\mathcal{O}(log(n))$
+                                * Compared to epsilon-greedy and the UCB algorithms, the Bernoulli Thompson Sampling algorithm underestimates the estimated rewards for the sub-optimal arms, and overestimates the reward of the most optimal arm.
+                            """)
+
+        num_arms = st.selectbox("Choose the number of arms", list(range(2, 6)))
+        true_rewards = [st.slider(f"Set the true reward for arm {i}", 0.0, 1.0) for i in range(num_arms)]
+        num_iterations = st.slider("Choose the number of iterations", 100, 50000)
+
+        st.subheader('Proportion of Observations Assigned to Each Arm')
+        arm_chart = st.empty()
+        st.subheader('Estimated Reward for each arm')
+        regret_chart = st.empty()
+        st.subheader('Selection Probabilities Over Time')
+        prob_chart = st.empty()
+        st.subheader('Cumulative and Average Regret Over Time')
+        selection_prob_chart = st.empty()
+        st.subheader('Beta Distributions Over Time')
+        beta_chart = st.empty()
+
+        bandit = BernoulliThompson(num_arms)
+        rewards, cumulative_regrets, average_regrets = run_simulation_bts(bandit, true_rewards, num_iterations,
+                                                                          arm_chart,
+                                                                          regret_chart, prob_chart,
+                                                                          selection_prob_chart, beta_chart)
+    elif options == 'Contextual Bandits':
+        st.header("Contextual Bandits")
+        st.subheader('Content coming soon!!!')
 
 
 if __name__ == "__main__":
