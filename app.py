@@ -26,8 +26,11 @@ def run_simulation_bts(bandit, true_rewards, num_iterations, arm_chart, prob_cha
                                      'Average Regret': average_regrets[:i + 1]})
             prob_chart.bar_chart(bandit.arm_counts / np.sum(bandit.arm_counts))  # Show proportions of arm selections
             selection_prob_chart.line_chart(selection_probabilities[:i + 1])
-            beta_chart.pyplot(draw_beta_plot(bandit.alpha, bandit.beta))  # Update beta posterior chart
+            fig = draw_beta_plot(bandit.alpha, bandit.beta)  # Update beta posterior chart
+            beta_chart.pyplot(fig)  
+            plt.close(fig) 
     return rewards, cumulative_regrets, average_regrets
+
 
 def draw_beta_plot(alpha, beta_param):
     x = np.linspace(0, 1, 1002)[1:-1]
