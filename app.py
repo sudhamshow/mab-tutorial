@@ -74,7 +74,7 @@ def main():
         In this tutorial, we will delve into these algorithms and explore how they tackle the exploration-exploitation tradeoff to solve the multi-armed bandit problem.
         """)
 
-        st.subheader("Classification of Multi-Armed Bandit Problems", anchor=True)
+        st.subheader("Classification of Multi-Armed Bandit Problems")
 
         st.write(
             "The Multi-Armed Bandit problem can be classified into two major types: Context-Free and Contextual. The main difference between these two types is the presence or absence of additional information (context) that can assist in making decisions.")
