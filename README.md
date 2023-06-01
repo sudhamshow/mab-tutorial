@@ -1,2 +1,2 @@
-# thompson_sampling_tutorial
-An interactive tutorial on context-free and contextual (linear) Thompson Sampling in python
+# Multi-Armed bandit tutorial
+An interactive tutorial on context-free and contextual (linear) Multi-Armed Bandit algorithms in python
